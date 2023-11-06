@@ -16,6 +16,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var jpyLabel: UILabel!
     @IBOutlet weak var usdLabel: UILabel!
     @IBOutlet weak var trLabel: UILabel!
+    @IBOutlet weak var chooseRatesLabel: UILabel!
     
     
     override func viewDidLoad() {
@@ -101,6 +102,31 @@ class ViewController: UIViewController {
         task.resume()
         
     }
+    
+    
+    @IBAction func getSelectCurrency(_ sender: Any) {
+        
+        let alertController = UIAlertController(title: "Select Currency", message: "Choose a currency", preferredStyle: .actionSheet)
+            
+            
+            let currencies = ["CAD", "CHF", "GBP", "JPY", "USD", "TRY"]
+            
+            for currency in currencies {
+                let action = UIAlertAction(title: currency, style: .default) { (action) in
+                  
+                    self.chooseRatesLabel.text = "Selected Currency: \(currency)"
+                }
+                alertController.addAction(action)
+            }
+            
+            let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+            alertController.addAction(cancelAction)
+            
+            
+            self.present(alertController, animated: true, completion: nil)
+        
+    }
+    
     
 
 }
