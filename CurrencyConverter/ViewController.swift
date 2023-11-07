@@ -8,7 +8,7 @@
 import UIKit
 
 class ViewController: UIViewController {
-
+    
     
     @IBOutlet weak var cadLabel: UILabel!
     @IBOutlet weak var chfLabel: UILabel!
@@ -17,6 +17,11 @@ class ViewController: UIViewController {
     @IBOutlet weak var usdLabel: UILabel!
     @IBOutlet weak var trLabel: UILabel!
     @IBOutlet weak var chooseRatesLabel: UILabel!
+    
+    // 1-
+    let url = URL(string: "http://data.fixer.io/api/latest?access_key=5aabb5ecd29101e5a862740ba82ad043")
+    
+    let session = URLSession.shared
     
     
     override func viewDidLoad() {
@@ -34,10 +39,8 @@ class ViewController: UIViewController {
         // 3- Parsing & Json
         
         
-        // 1.
-        let url = URL(string: "http://data.fixer.io/api/latest?access_key=5aabb5ecd29101e5a862740ba82ad043")
         
-        let session = URLSession.shared
+        
         
         // Closure
         
@@ -106,28 +109,58 @@ class ViewController: UIViewController {
     
     @IBAction func getSelectCurrency(_ sender: Any) {
         
-        let alertController = UIAlertController(title: "Select Currency", message: "Choose a currency", preferredStyle: .actionSheet)
+        let alertController = UIAlertController(title: "Select Currency", message: "Choose a Currency", preferredStyle: .actionSheet)
+        
+        let task = session.dataTask(with: url!) { (data, response, error) in
             
-            
-            let currencies = ["CAD", "CHF", "GBP", "JPY", "USD", "TRY"]
-            
-            for currency in currencies {
-                let action = UIAlertAction(title: currency, style: .default) { (action) in
-                  
-                    self.chooseRatesLabel.text = "Selected Currency: \(currency)"
+            if error != nil {
+                let alert = UIAlertController(title: "Error", message: error?.localizedDescription, preferredStyle: UIAlertController.Style.alert)
+                let okButton = UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: nil)
+                alert.addAction(okButton)
+                self.present(alert, animated: true, completion: nil)
+                
+            }else{
+                if let data = data {
+                    do {
+                        let jsonResponse = try JSONSerialization.jsonObject(with: data, options: [])
+                        if let rates = (jsonResponse as? [String: Any])?["rates"] as? [String: Double] {
+                            for (currency,rate) in rates {
+                                let action = UIAlertAction(title: "\(currency): \(rate)", style: .default)
+                                { (action) in
+                                    DispatchQueue.main.async {
+                                        self.chooseRatesLabel.text = "Selected Cırrency : \(action.title!)"
+                                    }
+                                    
+                                }
+                                
+                                alertController.addAction(action)
+                               
+                                
+                            }
+                            let cancelAction = UIAlertAction(title: "Cancel", style: UIAlertAction.Style.default, handler: nil)
+                            alertController.addAction(cancelAction)
+                            
+                            DispatchQueue.main.async {
+                                self.present(alertController, animated: true, completion: nil)
+                            }
+                            
+                        }
+                    }catch{
+                        print("Error")
+                    }
+                    
+                    
                 }
-                alertController.addAction(action)
+                
+                
+                
             }
             
-            let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-            alertController.addAction(cancelAction)
-            
-            
-            self.present(alertController, animated: true, completion: nil)
+        }
+        
+        task.resume()
         
     }
     
     
-
 }
-
